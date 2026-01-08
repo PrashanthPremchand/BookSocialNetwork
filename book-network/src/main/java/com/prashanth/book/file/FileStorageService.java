@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -26,36 +27,39 @@ public class FileStorageService {
             @NonNull Integer userId
     ) {
 
-        final String fileUploadSubPath = "users" + File.separator + userId;
+        if (sourceFile.isEmpty()) {
+            throw new IllegalArgumentException("Cannot upload empty file");
+        }
+        String fileUploadSubPath = "users" + File.separator + userId;
         return uploadFile(sourceFile, fileUploadSubPath);
 
     }
 
-    private String uploadFile(
-            @NonNull MultipartFile sourceFile,
-             @NonNull String fileUploadSubPath
-    ) {
+    private String uploadFile(MultipartFile sourceFile, String fileUploadSubPath) {
 
-        final String finalUploadPath = fileUploadPath + File.separator + fileUploadSubPath;
-        File targetFolder = new File(finalUploadPath);
-        if(!targetFolder.exists()) {
-            boolean folderCreated = targetFolder.mkdirs();
-            if(!folderCreated) {
-                log.warn("Failed to create target folder");
-                return null;
-            }
-        }
-        final String fileExtension = getFileExtension(sourceFile.getOriginalFilename());
-        String targetFilePath = finalUploadPath + File.separator + System.currentTimeMillis() + "." + fileExtension;
-        Path targetPath = Paths.get(targetFilePath);
+        Path uploadDir = Paths.get(fileUploadPath, fileUploadSubPath);
+
         try {
-            Files.write(targetPath, sourceFile.getBytes());
-            log.info("File saved to: {}", targetFilePath);
-            return targetFilePath;
+            Files.createDirectories(uploadDir);
         } catch (IOException e) {
-            log.error("File was not saved", e);
+            log.error("Failed to create upload directory {}", uploadDir, e);
+            throw new IllegalStateException("Could not create upload directory");
         }
-        return null;
+
+        String extension = getFileExtension(sourceFile.getOriginalFilename());
+        String filename = extension.isEmpty()
+                ? UUID.randomUUID().toString()
+                : UUID.randomUUID() + "." + extension;
+        Path targetPath = uploadDir.resolve(filename);
+
+        try{
+            Files.write(targetPath, sourceFile.getBytes());
+            log.info("File saved successfully at {}", targetPath);
+            return targetPath.toString();
+        } catch (IOException e){
+            log.error("Failed to save file {}", filename, e);
+            throw new IllegalStateException("Failed to save file");
+        }
 
     }
 
@@ -65,10 +69,9 @@ public class FileStorageService {
             return "";
         }
         int lastDotIndex = filename.lastIndexOf(".");
-        if(lastDotIndex == -1) {
-            return "";
-        }
-        return filename.substring(lastDotIndex + 1).toLowerCase();
+        return (lastDotIndex == -1)
+        ? ""
+        : filename.substring(lastDotIndex + 1).toLowerCase();
 
     }
 

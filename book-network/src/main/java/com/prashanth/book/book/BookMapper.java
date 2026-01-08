@@ -1,9 +1,11 @@
 package com.prashanth.book.book;
 
+import com.prashanth.book.file.FileUtils;
 import com.prashanth.book.history.BookTransactionHistory;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-@Service
+@Component
 public class BookMapper {
     public Book toBook(BookRequest request) {
 
@@ -13,7 +15,7 @@ public class BookMapper {
                 .authorName(request.authorName())
                 .synopsis(request.synopsis())
                 .archived(false)
-                .sharable(request.sharable())
+                .shareable(request.sharable())
                 .build();
 
     }
@@ -27,8 +29,9 @@ public class BookMapper {
                 .synopsis(book.getSynopsis())
                 .rate(book.getRate())
                 .archived(book.isArchived())
-                .sharable(book.isSharable())
+                .sharable(book.isShareable())
                 .owner(book.getOwner().fullName())
+                .cover(FileUtils.readFileFromLocation(book.getBookCover()))
                 .build();
     }
 
