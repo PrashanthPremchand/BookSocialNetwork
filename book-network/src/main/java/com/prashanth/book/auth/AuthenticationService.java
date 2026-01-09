@@ -35,8 +35,8 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-//    @Value("${application.mailing.frontend.activation-url}")
-    private String activationUrl = "http://localhost:4200/activate-account";
+    @Value("${application.mailing.frontend.activation-url}")
+    private String activationUrl;
 
     public void register(RegistrationRequest registrationRequest) throws MessagingException {
 
