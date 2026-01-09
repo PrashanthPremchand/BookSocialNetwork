@@ -112,32 +112,47 @@ jobs:
     name: Deploy Backend
     runs-on: self-hosted
     needs: [ build-and-push ]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create deployment folder (Windows)
+        shell: powershell
         run: |
           $deployPath = "$env:USERPROFILE\ci-cd"
           New-Item -ItemType Directory -Path $deployPath -Force
 
       - name: Copy docker-compose file (Windows)
+        shell: powershell
         run: |
           $deployPath = "$env:USERPROFILE\ci-cd"
           Copy-Item "docker-compose.yml" -Destination "$deployPath\docker-compose.yml" -Force
 
-      - name: Set ENV variable and deploy (Windows)
+      - name: Deploy containers (Windows)
         shell: powershell
-        run: |
-          $deployPath = "$env:USERPROFILE\ci-cd"
-          cd $deployPath
-          docker compose pull -q
-          docker compose up -d
         env:
+          # Docker
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           APP_VERSION: ${{ needs.build-and-push.outputs.project_version }}
+
+          # Spring
+          SPRING_PROFILES_ACTIVE: dev
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+          # Mail
           EMAIL_HOST_NAME: ${{ secrets.EMAIL_HOST_NAME }}
           EMAIL_USER_NAME: ${{ secrets.EMAIL_USER_NAME }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+
+        run: |
+          $deployPath = "$env:USERPROFILE\ci-cd"
+          cd $deployPath
+
+          docker compose config
+          docker compose pull
+          docker compose up -d
+  
 
 
 
