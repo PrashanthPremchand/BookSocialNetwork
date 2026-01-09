@@ -20,10 +20,13 @@ services:
     ports:
       - "1080:1080"
       - "1025:1025"
+    networks:
+      - spring-demo
   bsn-api:
     container_name: bsn-api
-    image: bsn/bsn:1.0.0
+    image: bsn/bsn:${APP_VERSION}
     environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/book_social_network_db
       EMAIL_HOST_NAME: ${EMAIL_HOST_NAME}
       EMAIL_USER_NAME: ${EMAIL_USER_NAME}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
@@ -33,6 +36,7 @@ services:
       - spring-demo
     depends_on:
       - postgres
+      - mail_dev
 
 
 networks:
