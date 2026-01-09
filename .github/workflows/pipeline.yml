@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - book-network/book-network/**
+      - book-network/**
       - Dockerfile
       - 'docker-compose.yml'
       - .github/workflows/pipeline.yml
