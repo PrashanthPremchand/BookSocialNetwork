@@ -113,26 +113,28 @@ jobs:
     runs-on: self-hosted
     needs: [ build-and-push ]
     steps:
-      # 1. We use the checkout action to get the docker-compose.yml file onto the runner
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create deployment folder (Local)
-        run: mkdir -p ~/ci-cd
+      - name: Create deployment folder (Windows)
+        run: |
+          $deployPath = "$env:USERPROFILE\ci-cd"
+          New-Item -ItemType Directory -Path $deployPath -Force
 
-      - name: Copy docker-compose file (Local)
-        run: cp docker-compose.yml ~/ci-cd/docker-compose.yml
+      - name: Copy docker-compose file (Windows)
+        run: |
+          $deployPath = "$env:USERPROFILE\ci-cd"
+          Copy-Item "docker-compose.yml" -Destination "$deployPath\docker-compose.yml" -Force
 
-      - name: Set ENV variable and deploy (Local)
-        # Using working-directory is cleaner than 'cd' in a multi-line script
-        working-directory: ~/ci-cd
+      - name: Set ENV variable and deploy (Windows)
+        working-directory: $env:USERPROFILE\ci-cd
         run: |
           docker compose pull -q
           docker compose up -d
         env:
-          # IMPORTANT: Pass the version to the local environment so docker-compose knows which image to pull
           APP_VERSION: ${{ needs.build-and-push.outputs.project_version }}
           EMAIL_HOST_NAME: ${{ secrets.EMAIL_HOST_NAME }}
           EMAIL_USER_NAME: ${{ secrets.EMAIL_USER_NAME }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+
 
