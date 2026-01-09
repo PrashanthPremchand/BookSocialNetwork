@@ -127,7 +127,7 @@ jobs:
           Copy-Item "docker-compose.yml" -Destination "$deployPath\docker-compose.yml" -Force
 
       - name: Set ENV variable and deploy (Windows)
-        shell: pwsh
+        shell: powershell
         run: |
           $deployPath = "$env:USERPROFILE\ci-cd"
           cd $deployPath
@@ -138,6 +138,7 @@ jobs:
           EMAIL_HOST_NAME: ${{ secrets.EMAIL_HOST_NAME }}
           EMAIL_USER_NAME: ${{ secrets.EMAIL_USER_NAME }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+
 
 
 
