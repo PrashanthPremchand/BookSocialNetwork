@@ -2,7 +2,8 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/book_social_network_db
     username: postgres
-    password: PostgreSQLPass@2025
+#    password: PostgreSQLPass@2025
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:

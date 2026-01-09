@@ -4,7 +4,8 @@ services:
     image: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: PostgreSQLPass@2025
+#      POSTGRES_PASSWORD: PostgreSQLPass@2025
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /var/lib/postgresql/data
       POSTGRES_DB: book_social_network_db
     volumes:
